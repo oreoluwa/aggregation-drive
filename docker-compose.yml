@@ -1,0 +1,22 @@
+version: '3.7'
+
+services:
+  app:
+    image: oreoluwa/aggr_drive
+    build:
+      context: .
+    command: ['npm', 'start' ]
+    ports:
+      - "3001:3000"
+    volumes:
+      - $PWD/app:/var/app
+    working_dir: /var/app
+    environment:
+      - BOX_CLIENT_ID
+      - BOX_CLIENT_SECRET
+      - DROPBOX_CLIENT_ID
+      - DROPBOX_CLIENT_SECRET
+      - DROPBOX_REDIRECT_URI
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+      - GOOGLE_REDIRECT_URI
