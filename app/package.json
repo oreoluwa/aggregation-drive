@@ -1,0 +1,33 @@
+{
+  "name": "@oreoluwa/aggregate-drive",
+  "version": "1.0.0",
+  "description": "A quick implementation for an aggregator drive",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "box-node-sdk": "^1.29.1",
+    "dropbox-v2-api": "^2.4.7",
+    "express": "^4.17.1",
+    "googleapis": "^44.0.0",
+    "leveldown": "^5.4.1",
+    "levelup": "^4.3.2",
+    "memfs": "^2.16.1",
+    "morgan": "^1.9.1",
+    "multer": "^1.4.2",
+    "sequelize": "^5.21.2",
+    "sequelize-cli": "^5.5.1",
+    "sqlite3": "^4.1.0",
+    "umzug-sync": "^1.0.0",
+    "weighted-round-robin": "^2.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Oreoluwa <oreoluwa@outlook.com>",
+  "license": "MIT",
+  "config": {
+    "appPrefix": "aggr_drive-multi-cloud"
+  }
+}
