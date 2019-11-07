@@ -63,3 +63,5 @@ typings/
 *.sqlite3
 *.sqlite3-journal
 **/tokens/
+**/uploads/
+docker-compose.yml
