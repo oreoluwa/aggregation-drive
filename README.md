@@ -39,11 +39,12 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 - Manifest should either be centralized or distributed on each storages for easier coordination
 - FUSE
 - Web FileManager
-- Construct File Tree for proper management of File/Folder operations
+- [x] Construct File Tree for proper management of File/Folder operations
 - Implement Aggregated View for all files/folders on all Drives
 - Plugin Architecture for additional storage engines
 - Factor in file/folder sizes during uploads, without needing to make an external API call to get storage quota usage.
 - Split huge files so they can be uploaded anywhere(e.g. Box has an upload limit of about ~2-3GB) and merge the splitted files.
+- Find way of bypassing machine FS storage
 - Customize user fs - Allow users to determine how their uploads are handled e.g. prefer certain drives(only try to upload to other drives when preferred drive isn't available) or allow certain drives to handle specific file extensions or disable virtual FS(e.g uploads should mirror the original upload path- to allow user management in cloud).
 
 

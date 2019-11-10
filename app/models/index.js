@@ -2,7 +2,6 @@ const glob = require('glob');
 const path = require('path');
 
 const db = require('config/components/db');
-const Sequelize = require('sequelize');
 
 const modelFiles = glob.sync(path.join(__dirname, '/*/schema.js'));
 

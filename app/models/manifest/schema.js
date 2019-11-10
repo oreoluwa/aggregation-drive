@@ -1,29 +1,13 @@
 /**
  * Manifest Schema module
  */
-
 const Sequelize = require('sequelize');
+const defaultManifestSettings = require('models/defaultManifestSettings');
 
 module.exports = (sequelizeDB, modelName) => {
   const Manifest = sequelizeDB.define(modelName, {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
-    },
-    parentId: {
-      type: Sequelize.UUID,
-      allowNull: true,
-    },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
+    ...defaultManifestSettings.attributes,
     digest: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    fullPath: {
       type: Sequelize.STRING,
       allowNull: false,
     },
@@ -48,14 +32,8 @@ module.exports = (sequelizeDB, modelName) => {
       defaultValue: false,
       allowNull: false,
     },
-    userId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    metadata: {
-      type: Sequelize.JSON,
-      allowNull: true,
-    },
+  }, {
+    hierarchy: defaultManifestSettings.hierarchyConfig,
   });
 
   Manifest.associate = (models) => {

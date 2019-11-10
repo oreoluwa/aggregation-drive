@@ -20,7 +20,7 @@ module.exports = {
       },
       digest: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       fullPath: {
         type: Sequelize.STRING,

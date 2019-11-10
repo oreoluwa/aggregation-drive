@@ -29,7 +29,7 @@ Router.use((req, res, next) => {
   req.userId = '3fb7f167-b601-4aa0-900a-1dac8d9a8e59';
 
   next();
-})
+});
 
 Router.get('/:provider/login', validateProvider, async (req, res, next) => {
   return providerMap[req.params.provider].login(req, res, next);
