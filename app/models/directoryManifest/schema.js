@@ -1,40 +1,16 @@
 /**
  * DirectoryManifest Schema module
  */
-
 const Sequelize = require('sequelize');
+const defaultManifestSettings = require('models/defaultManifestSettings');
 
 module.exports = (sequelizeDB, modelName) => {
   const DirectoryManifest = sequelizeDB.define(modelName, {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
-      primaryKey: true,
-    },
-    parentId: {
-      type: Sequelize.UUID,
-      allowNull: true,
-    },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    fullPath: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
+    ...defaultManifestSettings.attributes,
     isDirectory: {
       type: Sequelize.BOOLEAN,
       defaultValue: true,
       allowNull: false,
-    },
-    userId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    metadata: {
-      type: Sequelize.JSON,
-      allowNull: true,
     },
   }, {
     defaultScope: {
@@ -44,6 +20,7 @@ module.exports = (sequelizeDB, modelName) => {
     },
     freezeTableName: true,
     tableName: 'manifests',
+    hierarchy: defaultManifestSettings.hierarchyConfig,
   });
 
   DirectoryManifest.associate = (models) => {

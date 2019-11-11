@@ -19,7 +19,21 @@ const calculateQuotaUsage = async (client) => {
   return (totalUsed / totalStorage) * 100;
 }
 
+const getStorageLimit = async (client) => {
+  const user = await client.users.get(client.CURRENT_USER_ID);
+
+  return parseInt(user.space_amount, 10); // bytes
+};
+
+const getStorageUsage = async (client) => {
+  const user = await client.users.get(client.CURRENT_USER_ID);
+
+  return parseInt(user.space_used, 10); // bytes
+};
+
 module.exports = {
   getClient,
   calculateQuotaUsage,
+  getStorageLimit,
+  getStorageUsage,
 };

@@ -1,21 +1,17 @@
 const fs = require('fs');
 const Peers = require('weighted-round-robin');
 const models = require('models').initializeModels();
+const serviceHelper = require('services/helpers');
 
 const User = models.user;
 const Identity = models.identity;
 const Manifest = models.manifest;
-const providerMap = {
-  box: require('services/box'),
-  dropbox: require('services/dropbox'),
-  googleDrive: require('services/googleDrive'),
-};
 
 const getProviders = (identities = [], user) => {
   const providers = identities.reduce((acc, identity) => {
     const { provider } = identity
     acc[provider] = {
-      handler: providerMap[provider],
+      handler: serviceHelper.services[provider],
       identity,
     }
 
@@ -103,4 +99,18 @@ const uploader = async (req, userFs) => {
   });
 }
 
-module.exports = uploader;
+const upload = async (client, identity, manifest) => {
+  const { digest, metadata: fileInfo } = manifest;
+  const { folderId, folderName, provider } = identity;
+
+  const stream = fs.createReadStream(fileInfo.path);
+
+  const fileId = await serviceHelper.services[provider].upload(client, folderId, folderName, digest, stream);
+
+  return fileId;
+}
+
+module.exports = {
+  uploader,
+  upload,
+};

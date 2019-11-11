@@ -19,9 +19,6 @@ app.use(bodyParser.json());
 app.START_TIME = +new Date();
 
 module.exports = (async () => {
-  const modelDriver = require('models');
-  await modelDriver.sequelizeMigrate();
-
   const routes = require('./routes');
   app.use(routes);
 
