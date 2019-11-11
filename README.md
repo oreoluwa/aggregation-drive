@@ -40,6 +40,7 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 - FUSE
 - Web FileManager
 - [x] Construct File Tree for proper management of File/Folder operations
+- [] Improve SQL query: use bulkUpdate and bulkFetch
 - Implement Aggregated View for all files/folders on all Drives
 - Plugin Architecture for additional storage engines
 - Factor in file/folder sizes during uploads, without needing to make an external API call to get storage quota usage.

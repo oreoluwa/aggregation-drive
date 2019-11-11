@@ -5,8 +5,6 @@ const Manifest = models.manifest;
 const helper = require('services/helpers');
 const Balancer = require('weighted-round-robin');
 
-console.log('===.???? ==> drive ', helper)
-
 class Drive {
   constructor(user, identities) {
     this.userId = user.id;
