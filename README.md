@@ -37,6 +37,7 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 ## TODO
 * [x] Construct File Tree for proper management of File/Folder operations
 * [x] Ability to download files/folder
+* [x] Find way of bypassing machine FS storage
 * [ ] Ability to move file/folders from location
 * [ ] Before saving file/folder, check if manifest name changed, then change associated paths
 * [ ] Web FileManager
@@ -48,7 +49,6 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 * [ ] Plugin Architecture for additional storage engines
 * [ ] Factor in file/folder sizes during uploads, without needing to make an external API call to get storage quota usage.
 * [ ] Split huge files so they can be uploaded anywhere(e.g. Box has an upload limit of about ~2-3GB) and merge the splitted files.
-* [ ] Find way of bypassing machine FS storage
 * [ ] Customize user fs - Allow users to determine how their uploads are handled e.g. prefer certain drives(only try to upload to other drives when preferred drive isn't available) or allow certain drives to handle specific file extensions or disable virtual FS(e.g uploads should mirror the original upload path- to allow user management in cloud).
 
 
