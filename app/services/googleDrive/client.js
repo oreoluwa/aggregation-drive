@@ -3,6 +3,10 @@ const tokenStore = require('config/components/tokenStore');
 const promisify = require('util').promisify;
 
 const getClient = async (userId) => {
+  return getBasicClient(userId);
+};
+
+const getBasicClient = async (userId) => {
   const userStore = tokenStore('googleDrive', userId);
   const asyncTokenRead = promisify(userStore.read);
   const tokenInfo = await asyncTokenRead();
@@ -15,7 +19,7 @@ const getClient = async (userId) => {
 
 const calculateQuotaUsage = async (client) => {
   const quotaUsageRes = await client.about.get({
-   fields: ["storageQuota"],
+   fields: ['storageQuota'],
   });
 
   const quotaUsage = quotaUsageRes.data.storageQuota;
@@ -44,6 +48,7 @@ const getStorageUsage = async (client) => {
 
 module.exports = {
   getClient,
+  getBasicClient,
   calculateQuotaUsage,
   getStorageLimit,
   getStorageUsage,

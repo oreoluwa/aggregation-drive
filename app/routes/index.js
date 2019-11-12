@@ -1,6 +1,6 @@
 const Router = require('express').Router();
 const providers = require('controllers/providers');
-const uploadController = require('controllers/upload');
+const driveController = require('controllers/drive');
 const multer = require('multer');
 
 const providerControllers = Object.keys(providers);
@@ -40,7 +40,8 @@ Router.get('/:provider/callback', validateProvider, async (req, res, next) => {
 })
 
 const uploader = multer({ dest: 'uploads/', preservePath: true });
-Router.post('/uploadFile', uploader.any(), uploadController);
+Router.post('/uploadFile', uploader.any(), driveController.upload);
+Router.get('/download/:fileId', driveController.download);
 
 Router.get('/upload', (req, res) => {
   return res.status(200).send(`

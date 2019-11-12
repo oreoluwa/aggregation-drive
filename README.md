@@ -35,11 +35,14 @@ Load balancing - distributes files on your Cloud Storage based on your usage quo
 Flat folder - all uploaded files are stored in a single folder on each Cloud Storage Service, but they're logically grouped in the database, so the DB is ever the only source of truth
 
 ## TODO
+* [x] Construct File Tree for proper management of File/Folder operations
+* [x] Ability to download files/folder
+* [ ] Ability to move file/folders from location
+* [ ] Before saving file/folder, check if manifest name changed, then change associated paths
+* [ ] Web FileManager
+* [ ] FUSE
 * [ ] Prefer TypeScript for interface definitions
 * [ ] Manifest should either be centralized or distributed on each storages for easier coordination
-* [ ] FUSE
-* [ ] Web FileManager
-* [x] Construct File Tree for proper management of File/Folder operations
 * [ ] Improve SQL query: use bulkUpdate and bulkFetch
 * [ ] Implement Aggregated View for all files/folders on all Drives
 * [ ] Plugin Architecture for additional storage engines

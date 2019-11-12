@@ -3,6 +3,12 @@ const dropboxV2Api = require('dropbox-v2-api');
 const promisify = require('util').promisify;
 
 const getClient = async (userId) => {
+  const client = await getBasicClient(userId);
+
+  return promisify(client);
+}
+
+const getBasicClient = async (userId) => {
   const userStore = tokenStore('dropbox', userId);
   const asyncTokenRead = promisify(userStore.read);
   const tokenInfo = await asyncTokenRead();
@@ -11,7 +17,7 @@ const getClient = async (userId) => {
     token: tokenInfo.access_token,
   });
 
-  return promisify(client)
+  return client;
 }
 
 const calculateQuotaUsage = async (client) => {
@@ -43,6 +49,7 @@ const getStorageUsage = async (client) => {
 
 module.exports = {
   getClient,
+  getBasicClient,
   calculateQuotaUsage,
   getStorageLimit,
   getStorageUsage,
