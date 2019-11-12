@@ -14,9 +14,6 @@ const uploadController = (req, res) => (async () => {
   const userFakeFs = userFs(files);
   const dirStructure = userFakeFs.dirStructure('/');
   const persistedTree = await buildDBTree(req.userId, dirStructure);
-  const manifests = extractManifestsFromTree(persistedTree);
-
-  await userDrive.addFiles(manifests);
 
   return res.status(200).send(dirStructure);
 })().catch(console.error);

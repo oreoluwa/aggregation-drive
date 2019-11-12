@@ -65,6 +65,23 @@ class Drive {
     return manifest;
   };
 
+  async uploadStream (stream, digest) {
+    const currentStorage = this.storage.getIdentity();
+    const identity = currentStorage.identity;
+    const client = currentStorage.client;
+
+    const providerManifestId = await helper.uploader.uploadStream(client, identity, stream, digest);
+
+    return [ identity.provider, providerManifestId ];
+  };
+
+  async removeFile (identityProvider, providerManifestId) {
+    const clientService = helper.services[ identityProvider ].client;
+    const client = await clientService.getClient(this.userId);
+
+    return helper.services[ identityProvider ].remove(client, providerManifestId);
+  }
+
   async getReadableStream(manifest) {
     const { digest, provider, providerManifestId: documentId } = manifest;
     const { folderId, folderName } = this.identities[ provider ];
