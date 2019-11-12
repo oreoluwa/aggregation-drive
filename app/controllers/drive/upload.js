@@ -12,7 +12,7 @@ const uploadController = (req, res) => (async () => {
   //
   // ############
   const userFakeFs = userFs(files);
-  const dirStructure = userFakeFs.dirStructure('/');
+  const dirStructure = userFakeFs.dirStructure('/root');
   const persistedTree = await buildDBTree(req.userId, dirStructure);
 
   return res.status(200).send(dirStructure);

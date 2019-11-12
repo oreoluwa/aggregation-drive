@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const path = require('path');
 
 const attributes = {
   id: {
@@ -26,6 +27,17 @@ const attributes = {
     type: Sequelize.JSON,
     allowNull: true,
   },
+  pathArray: {
+    type: Sequelize.VIRTUAL(Sequelize.ARRAY, ['fullPath']),
+    get: function () {
+      let fullPath = this.get('fullPath');
+      if (fullPath && fullPath.substr(0, 1) === '/'){
+        fullPath = fullPath.substr(1);
+      }
+      return fullPath.split('/');
+    },
+    set: function (value) { this.setDataValue('fullPath', path.join('/', ...value) ) }
+  }
 };
 
 const hierarchyConfig = {

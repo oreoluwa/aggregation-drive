@@ -112,7 +112,7 @@ class Drive {
       if (!tree.isDirectory) {
         const readStream = await this.getReadableStream(tree);
         let filePath = tree.fullPath;
-        filePath = filePath[0] === '/' ? filePath.substr(1) : filePath;
+        filePath = filePath.startsWith('/root/') ? filePath.replace(/^\/root\//gi, '') : filePath;
 
         return archive.append(readStream, { name: filePath });
       };

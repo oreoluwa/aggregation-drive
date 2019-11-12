@@ -4,7 +4,7 @@ const Manifest = Models.manifest;
 const util = require('util');
 
 const buildRootNode = async (userId) => {
-  const rootScope = { userId, fullPath: '/'};
+  const rootScope = { userId, fullPath: '/root', name: 'root'};
 
   const [ rootNode, isCreated ] = await Directory.findOrCreate({
     where: rootScope,

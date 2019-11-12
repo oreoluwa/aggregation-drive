@@ -1,6 +1,7 @@
 const Router = require('express').Router();
 const providers = require('controllers/providers');
 const driveController = require('controllers/drive');
+const manifestController = require('controllers/manifest');
 const multer = require('multer');
 const multerMultiStorage = require('lib/multer-stream');
 
@@ -59,5 +60,7 @@ Router.get('/upload', (req, res) => {
     <p>You can select any directory with multiple files or multiple child directories in it.</p>
   `)
 })
+
+Router.put('/manifest/:fileId', manifestController.update);
 
 module.exports = Router;
