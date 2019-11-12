@@ -1,6 +1,5 @@
 const Models = require('models').initializeModels();
 const Manifest = Models.manifest;
-
 const Drive = require('services/drive');
 
 const downloadController = (req, res) => (async () => {

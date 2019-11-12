@@ -14,8 +14,6 @@ const buildRootNode = async (userId) => {
   return rootNode;
 }
 
-const logggg = (...args) => console.log('==> ==> => ->', util.inspect(args, false, null, true));
-
 const buildDBTree = async (userId, dirTree, parentId=null) => {
   const buildTree = dirTree || {};
   const isDirectory = dirTree.type === 'folder';
@@ -52,6 +50,8 @@ const buildDBTree = async (userId, dirTree, parentId=null) => {
         digest: dirTree.digest,
         mimeType: dirTree.mimeType,
         size: dirTree.size,
+        providerManifestId: dirTree.providerManifestId,
+        provider: dirTree.provider,
       },
     });
     // handle replacing file content

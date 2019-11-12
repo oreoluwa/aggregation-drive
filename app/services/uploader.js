@@ -100,10 +100,14 @@ const uploader = async (req, userFs) => {
 }
 
 const upload = async (client, identity, manifest) => {
-  const { digest, metadata: fileInfo } = manifest;
-  const { folderId, folderName, provider } = identity;
-
+  const { metadata: fileInfo, digest } = manifest;
   const stream = fs.createReadStream(fileInfo.path);
+
+  return uploadStream(client, identity, stream, digest);
+}
+
+const uploadStream = async (client, identity, stream, digest) => {
+  const { folderId, folderName, provider } = identity;
 
   const fileId = await serviceHelper.services[provider].upload(client, folderId, folderName, digest, stream);
 
@@ -113,4 +117,5 @@ const upload = async (client, identity, manifest) => {
 module.exports = {
   uploader,
   upload,
+  uploadStream,
 };

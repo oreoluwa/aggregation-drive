@@ -35,6 +35,8 @@ const dirTree = (fs, filename, manifestMap) => {
     info.digest = fileDetail.filename;
     info.mimeType = fileDetail.mimetype;
     info.size = fileDetail.size;
+    info.provider = fileDetail.provider;
+    info.providerManifestId = fileDetail.providerManifestId;
   }
 
   return info;
