@@ -40,6 +40,7 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 * [x] Find way of bypassing machine FS storage
 * [x] Ability to move file/folders from location
 * [x] Before saving file/folder, check if manifest name changed, then change associated paths
+* [ ] Support multiple drives from the same provider
 * [ ] Web FileManager
 * [ ] FUSE
 * [ ] Prefer TypeScript for interface definitions

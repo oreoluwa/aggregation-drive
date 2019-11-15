@@ -7,11 +7,26 @@
 //   return file;
 // }
 
-const uploadToDrive = async (client, folderId, folderName, digest, stream) => {
+const onTheFlyCompress = require('helpers/onTheFlyCompress');
 
-  const file = await client.files.uploadFile(folderId, digest, stream);
+const uploadToDrive = async (client, folderId, folderName, digest, stream, fileId) => {
+  const boxFileId = await new Promise((resolve, reject) => {
+    onTheFlyCompress(stream, digest, async (err, fStream) => {
+      if (err) return reject(err);
 
-  return file.entries[0].id;
+      let file;
+      if (!fileId) {
+        file = await client.files.uploadFile(folderId, digest, fStream);
+      } else {
+        file = await client.files.uploadNewFileVersion(fileId, fStream);
+      };
+
+      resolve(file.entries[0].id);
+
+    });
+  });
+
+  return boxFileId;
 }
 
 module.exports = uploadToDrive;

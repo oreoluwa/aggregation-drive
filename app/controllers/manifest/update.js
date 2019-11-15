@@ -1,5 +1,6 @@
 const Models = require('models').initializeModels();
 const Manifest = Models.manifest;
+const manifestSerializer = require('serializers/manifestSerializer');
 // const util = require('util');
 // const logggg = (...args) => console.log('==> ==> => ->', util.inspect(args, false, null, true))
 
@@ -93,7 +94,7 @@ const updateController = (req, res) => (async () => {
 
         const updatedManifest = await manifest.reload();
 
-        return res.status(200).send(updatedManifest);
+        return res.status(200).send(manifestSerializer(updatedManifest));
       })().catch(console.error);
 
     module.exports = updateController;

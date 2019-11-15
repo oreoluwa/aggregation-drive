@@ -1,4 +1,5 @@
 const path = require('path');
+const { ROOT_PATH } = require('config/components/variables');
 const { createFsFromVolume, Volume } = require('memfs');
 
 const userFs = (files, mountPath) => {
@@ -42,7 +43,7 @@ const dirTree = (fs, filename, manifestMap) => {
 };
 
 const constructDirectoryMap = (vol, files, pathPrefix) => {
-  const mountPath = pathPrefix || '/root';
+  const mountPath = pathPrefix || ROOT_PATH;
   const manifestMap = {};
 
   const fileJson = files.reduce((acc, fileDetail) => {

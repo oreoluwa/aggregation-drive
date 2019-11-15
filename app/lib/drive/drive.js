@@ -1,11 +1,15 @@
+const path = require('path');
+const { ROOT_PATH } = require('config/components/variables');
 const models = require('models').initializeModels();
 const User = models.user;
 const Identity = models.identity;
 const Manifest = models.manifest;
 const helper = require('services/helpers');
-const Storage = require('lib/drive/storage');
-const { ROOT_PREFIX, ROOT_PREFIX_REGEX } = require('config/components/variables');
-const archiver = require('archiver');
+// const crypto = require('crypto');
+
+const Storage = require('./storage');
+const File = require('./file');
+const Folder = require('./folder');
 
 const mapIdentities = (identities) => identities.reduce((acc, identity) => {
   acc[identity.provider] = identity;
@@ -27,6 +31,44 @@ class Drive {
     return this;
   }
 
+  getDocument(manifest) {
+    let document;
+    if (manifest.isDirectory) {
+      document = new Folder(this, manifest);
+    } else {
+      document = new File(this, manifest);
+    }
+
+    return document;
+  }
+
+  getSize (manifest) {
+    return this.getDocument(manifest).size;
+  }
+
+  async delete (manifest) {
+    return this.getDocument(manifest).delete();
+  }
+
+  async upload(stream, manifest) {
+    return this.getDocument(manifest).upload(stream);
+  }
+
+  async directUpload (stream, file) {
+    let manifest = await this.getManifestByFilename(file.originalname);
+    if (!manifest) {
+      manifest = {
+        isDirectory: false
+      }
+    }
+
+    return this.getDocument(manifest).upload(stream);
+  }
+
+  async download(stream, manifest) {
+    return this.getDocument(manifest).download(stream);
+  }
+
   async addStorageIdentities () {
     await Object.keys(this.identities).reduce(async (asyncAcc, identityProvider) => {
       await asyncAcc;
@@ -37,7 +79,7 @@ class Drive {
       // based on some other user configurations, determine the weight;
       // right now using the available storage space proportion to determine the
       // weight.
-      const weight = await clientService.calculateQuotaUsage(client);
+      const weight = 10 // await clientService.calculateQuotaUsage(client);
 
       this.storage.addIdentity(identity, client, weight);
     }, Promise.resolve());
@@ -54,79 +96,6 @@ class Drive {
 
       return uploadedManifests.concat(currentManifest);
     }, Promise.resolve([]));
-  }
-
-  async uploadManifest (client, identity, manifest) {
-    const fileId = await helper.uploader.upload(client, identity, manifest);
-    manifest.providerManifestId = fileId;
-    manifest.provider = identity.provider;
-
-    await manifest.save();
-
-    return manifest;
-  };
-
-  async uploadStream (stream, digest) {
-    const currentStorage = this.storage.getIdentity();
-    const identity = currentStorage.identity;
-    const client = currentStorage.client;
-
-    const providerManifestId = await helper.uploader.uploadStream(client, identity, stream, digest);
-
-    return [ identity.provider, providerManifestId ];
-  };
-
-  async removeFile (identityProvider, providerManifestId) {
-    const clientService = helper.services[ identityProvider ].client;
-    const client = await clientService.getClient(this.userId);
-
-    return helper.services[ identityProvider ].remove(client, providerManifestId);
-  }
-
-  async getReadableStream(manifest) {
-    const { digest, provider, providerManifestId: documentId } = manifest;
-    const { folderId, folderName } = this.identities[ provider ];
-    const storageService = helper.services[ provider ];
-
-    const client = await storageService.client.getBasicClient(this.userId);
-    const readStream = await storageService.download(client, folderId, folderName, documentId, digest);
-
-    return readStream;
-  }
-
-  async downloadManifest (manifest, writeableStream) {
-    const readStream = await this.getReadableStream(manifest);
-    return readStream.pipe(writeableStream);
-  };
-
-  async downloadDirectory (manifest, writeableStream, archiveFormat='zip') {
-    const archive = archiver(archiveFormat, {
-      gzip: true,
-      zlib: {
-        level: 9,
-      },
-    });
-
-    archive.pipe(writeableStream);
-
-    const recurseAppendFile = async (tree, archive) => {
-      if (!tree.isDirectory) {
-        const readStream = await this.getReadableStream(tree);
-        let filePath = tree.fullPath;
-        filePath = filePath.startsWith(ROOT_PREFIX) ? filePath.replace(ROOT_PREFIX_REGEX, '') : filePath;
-
-        return archive.append(readStream, { name: filePath });
-      };
-
-      return tree.children.reduce(async (asyncAcc, childTree) => {
-        await asyncAcc;
-        return recurseAppendFile(childTree, archive);
-      }, Promise.resolve());
-    };
-
-    await recurseAppendFile(manifest, archive);
-
-    return archive.finalize();
   }
 
   async driveLimit () {
@@ -151,6 +120,15 @@ class Drive {
 
       return total + serviceTotal;
     }, Promise.resolve(0));
+  };
+
+  async getManifestByFilename (filePath) {
+    return Manifest.findOne({
+      where: {
+        fullPath: path.join(ROOT_PATH, filePath),
+        userId: this.userId,
+      }
+    });
   };
 
   static async getUserDrive(userId) {

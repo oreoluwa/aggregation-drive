@@ -10,6 +10,7 @@
     "dropbox-v2-api": "^2.4.7",
     "express": "^4.17.1",
     "googleapis": "^44.0.0",
+    "is-uuid": "^1.0.2",
     "leveldown": "^5.4.1",
     "levelup": "^4.3.2",
     "memfs": "^2.16.1",

@@ -106,12 +106,12 @@ const upload = async (client, identity, manifest) => {
   return uploadStream(client, identity, stream, digest);
 }
 
-const uploadStream = async (client, identity, stream, digest) => {
+const uploadStream = async (client, identity, stream, digest, fileId) => {
   const { folderId, folderName, provider } = identity;
 
-  const fileId = await serviceHelper.services[provider].upload(client, folderId, folderName, digest, stream);
+  const providerId = await serviceHelper.services[provider].upload(client, folderId, folderName, digest, stream, fileId);
 
-  return fileId;
+  return providerId;
 }
 
 module.exports = {
