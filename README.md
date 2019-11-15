@@ -38,8 +38,8 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 * [x] Construct File Tree for proper management of File/Folder operations
 * [x] Ability to download files/folder
 * [x] Find way of bypassing machine FS storage
-* [ ] Ability to move file/folders from location
-* [ ] Before saving file/folder, check if manifest name changed, then change associated paths
+* [x] Ability to move file/folders from location
+* [x] Before saving file/folder, check if manifest name changed, then change associated paths
 * [ ] Web FileManager
 * [ ] FUSE
 * [ ] Prefer TypeScript for interface definitions

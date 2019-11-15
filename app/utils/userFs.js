@@ -20,12 +20,11 @@ const dirTree = (fs, filename, manifestMap) => {
     path: filename,
     name: path.basename(filename),
   };
-  if (stats.isDirectory()) {
-    if (info.path === '/') info.name = '/';
 
+  if (stats.isDirectory()) {
     info.type = 'folder';
     info.children = fs.readdirSync(filename).map((child) => {
-      const dirName = (filename + '/' + child).replace('//', '/');
+      const dirName = path.join(filename, child);
       return dirTree(fs, dirName, manifestMap);
     });
   } else {
@@ -43,15 +42,15 @@ const dirTree = (fs, filename, manifestMap) => {
 };
 
 const constructDirectoryMap = (vol, files, pathPrefix) => {
+  const mountPath = pathPrefix || '/root';
   const manifestMap = {};
 
   const fileJson = files.reduce((acc, fileDetail) => {
     acc[ fileDetail.originalname ] = JSON.stringify(fileDetail);
-    manifestMap[ '/' + fileDetail.originalname ] = fileDetail;
+    manifestMap[ path.join(mountPath, fileDetail.originalname) ] = fileDetail;
     return acc;
   }, {});
 
-  const mountPath = pathPrefix || '/';
   vol.fromJSON(fileJson, mountPath);
 
   return {
