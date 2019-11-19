@@ -42,7 +42,7 @@ Flat folder - all uploaded files are stored in a single folder on each Cloud Sto
 * [x] Before saving file/folder, check if manifest name changed, then change associated paths
 * [ ] Support multiple drives from the same provider
 * [ ] Web FileManager
-* [ ] FUSE
+* [x] FUSE
 * [ ] Prefer TypeScript for interface definitions
 * [ ] Manifest should either be centralized or distributed on each storages for easier coordination
 * [ ] Improve SQL query: use bulkUpdate and bulkFetch
