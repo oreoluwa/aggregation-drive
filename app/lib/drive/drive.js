@@ -5,7 +5,6 @@ const User = models.user;
 const Identity = models.identity;
 const Manifest = models.manifest;
 const helper = require('services/helpers');
-// const crypto = require('crypto');
 
 const Storage = require('./storage');
 const File = require('./file');
@@ -79,7 +78,7 @@ class Drive {
       // based on some other user configurations, determine the weight;
       // right now using the available storage space proportion to determine the
       // weight.
-      const weight = 10 // await clientService.calculateQuotaUsage(client);
+      const weight = await clientService.calculateQuotaUsage(client);
 
       this.storage.addIdentity(identity, client, weight);
     }, Promise.resolve());

@@ -29,25 +29,19 @@ const downloadController = (req, res) => (async () => {
 
   const docRef = getManifestRef(userDrive, manifest);
 
-  res.set({
-    'Content-Length': docRef.size,
-  })
-
   if (!manifest.isDirectory) {
     res.set({
       'Content-Type': manifest.mimeType,
       'Content-Disposition': `attachment; filename="${manifest.name}"`,
+      'Content-Length': docRef.size,
     });
-
-    // return userDrive.downloadManifest(manifest, res);
   } else {
     res.set({
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment;filename="${manifest.name}.zip"`,
+      'X-Original-Content-Length': docRef.size,
     });
-
-    // return userDrive.downloadDirectory(manifest, res);
-  }
+  };
 
   return userDrive.download(res, manifest);
 })().catch(console.error);

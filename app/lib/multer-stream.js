@@ -12,21 +12,23 @@ class MulterMultiStorage {
 
   _handleFile (req, file, cb) {
     const handleUpload = async (req, file, cb) => {
-      const stream = new PassThrough();
+      const utilStream = new PassThrough();
+      const stream     = new PassThrough();
 
       let size = 0;
       const hash = crypto.createHash('sha1');
       let sha1sum;
 
-      stream.on('data', (chunk) => {
+      utilStream.on('data', (chunk) => {
         size += chunk.length;
         hash.update(chunk);
       });
 
-      stream.on('end', () => {
+      utilStream.on('end', () => {
         sha1sum = hash.digest('hex');
       })
 
+      file.stream.pipe(utilStream);
       file.stream.pipe(stream);
 
       let err, response;
@@ -35,7 +37,7 @@ class MulterMultiStorage {
           provider,
           fileId,
           fileName,
-        } = await this.userDrive.directUpload(file.stream, file);
+        } = await this.userDrive.directUpload(stream, file);
 
         response = {
           filename: fileName,

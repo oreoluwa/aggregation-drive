@@ -5,7 +5,7 @@ const Manifest = Models.manifest;
 const util = require('util');
 
 const buildRootNode = async (userId) => {
-  const rootScope = { userId, fullPath: ROOT_PATH, name: ROOT_NAME};
+  const rootScope = { userId, fullPath: ROOT_PATH, name: ROOT_NAME };
 
   const [ rootNode, isCreated ] = await Directory.findOrCreate({
     where: rootScope,
@@ -41,18 +41,12 @@ const buildDBTree = async (userId, dirTree, parentOrParentId=null) => {
         ...whereScope,
       }
     });
-  } else {
-    parent = { id: null };
   };
-
-  // const scope = hasNode && (isRootNode && { fullPath: dirTree.path }) || { id: parentId };
-  //
-  // const parent = !hasNode ? { id: null } : (await );
 
   const defaultParams = {
     fullPath: dirTree.path,
     name: dirTree.name,
-    parentId: parent.id || null,
+    parentId: (parent && parent.id) || null,
     userId,
   }
 

@@ -7,11 +7,11 @@
 //   return file;
 // }
 
-const onTheFlyCompress = require('helpers/onTheFlyCompress');
+const onTheFlyDiskBuffer = require('helpers/onTheFlyDiskBuffer');
 
 const uploadToDrive = async (client, folderId, folderName, digest, stream, fileId) => {
   const boxFileId = await new Promise((resolve, reject) => {
-    onTheFlyCompress(stream, digest, async (err, fStream) => {
+    return onTheFlyDiskBuffer(stream, digest, async (err, fStream) => {
       if (err) return reject(err);
 
       let file;

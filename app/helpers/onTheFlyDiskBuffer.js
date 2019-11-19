@@ -8,23 +8,22 @@ const bufferToDisk = (stream, fileName, callback) => {
   const pathName = path.join(TEMPORARY_FILE_PATH, fileName);
   const writeableStream = fs.createWriteStream(pathName);
 
-  stream.pipe(writeableStream).on('error', callback);
-
   stream.on('end', () => {
-    // writeableStream.end();
-
     callback(null, readFromDisk(fileName));
   });
+
+  stream.pipe(writeableStream);
 
   return stream;
 }
 
 const readFromDisk = (fileName) => {
   const pathName = path.join(TEMPORARY_FILE_PATH, fileName);
+
   const readableStream = fs.createReadStream(pathName);
 
-  readableStream.on('close', () => {
-    fs.unlinkSync(pathName);
+  readableStream.on('end', () => {
+    fs.unlink(pathName, () => console.log(`Deleted temporary file: ${ pathName }`));
   });
 
   return readableStream;

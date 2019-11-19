@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const path = require('path');
+const notificationsHelper = require('helpers/webhookHandler');
 
 const attributes = {
   id: {
@@ -52,7 +53,20 @@ const hierarchyConfig = {
   onDelete: 'CASCADE',
 };
 
+const hooks = {
+  afterUpdate: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'update')
+  },
+  afterCreate: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'create')
+  },
+  afterDestroy: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'destroy')
+  },
+}
+
 module.exports = {
   attributes,
   hierarchyConfig,
+  hooks,
 };

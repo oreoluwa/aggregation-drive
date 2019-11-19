@@ -1,3 +1,6 @@
+const { debugPrefix } = require('../package.json');
+const debug = require('debug')(debugPrefix + ':proxyServer');
+
 const {
   PassThrough
 } = require('stream');
@@ -38,6 +41,17 @@ const downloadController = (req, res, next) => (async () => {
   } = responseCache ? responseCache : {};
 
   const contentRangeStr = req.headers.range;
+
+  if (!contentRangeStr) {
+    const downloadResponse = await req.proxyServer.axiosInstance.get(`download/${fileId}`, {
+      responseType: 'stream'
+    });
+
+    res.writeHead(downloadResponse.status, downloadResponse.headers);
+
+    return downloadResponse.data.pipe(res);
+  };
+
   const [start, maxRange] = contentRangeStr.replace(/bytes=/, "").split("-");
 
   let sentFirstByte = false;
@@ -65,7 +79,15 @@ const downloadController = (req, res, next) => (async () => {
 
         req.proxyServer.cache.set(cacheId, responseCache);
 
-        if (!sentFirstByte && maxRange && (maxRange < buffer.length)) {
+        const maxUpstreamFileSize = parseInt(headers['content-length']);
+        const effectiveContentLength = maxRange > maxUpstreamFileSize ? maxUpstreamFileSize : maxRange
+
+        debug.extend('responseHeaders')(JSON.stringify(headers));
+        debug.extend('maxRange')(maxRange);
+        debug.extend('bufferLength')(buffer.length);
+        debug.extend('effectiveContentLength')(effectiveContentLength);
+
+        if (!sentFirstByte && effectiveContentLength && (effectiveContentLength <= buffer.length)) {
           sentFirstByte = true;
           return responseHandler(res, buffer, headers);
         };
@@ -91,59 +113,6 @@ const downloadController = (req, res, next) => (async () => {
   } else {
     return responseHandler(res, response, {});
   }
-})().catch(console.error);
-
-
-
-// stream.end(data);
-
-    // res.writeHead(206, head);
-
-    // const stream = new PassThrough();
-    // stream.pipe(res);
-
-    // console.log('===>', head);
-
-
-    // console.log('====>>>', data.toString('utf8'))
-    // stream.on('data', console.log);
-
-
-// const end = maxRange ? parseInt(maxRange, 10) : (response.length - 1);
-// const chunkSize = (end - start) + 1;
-//
-// const content = response.slice(start, end);
-//
-// const head = {
-//   'Content-Range': `bytes ${start}-${end}/${chunkSize}`,
-//   'Accept-Ranges': 'bytes',
-//   'Content-Length': chunkSize,
-//   // 'Content-Type': 'video/mp4',
-// }
-// res.writeHead(206, head);
-//
-// const stream = new PassThrough();
-//
-// stream.end(content);
-//
-// stream.pipe(res);
-
-// const response = await req.proxyServer.axiosInstance.get(`download/${req.param.fileId}`, {
-//   responseType: 'stream'
-// });
-// return response.data;
-
-
-
-
-
-// var end = partialend ? parseInt(partialend, 10) : total-1;
-// var chunksize = (end-start)+1;
-// console.log('RANGE: ' + start + ' - ' + end + ' = ' + chunksize);
-//
-// var file = fs.createReadStream(path, {start: start, end: end});
-// res.writeHead(206, { 'Content-Range': 'bytes ' + start + '-' + end + '/' + total, 'Accept-Ranges': 'bytes', 'Content-Length': chunksize, 'Content-Type': 'video/mp4' });
-// file.pipe(res);
-
+})().catch(next);
 
 module.exports = downloadController;

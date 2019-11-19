@@ -15,7 +15,8 @@ const uploadController = (req, res) => (async () => {
   const userDrive = await Drive.getUserDrive(req.userId);
 
   const {
-    files
+    files,
+    rootNode,
   } = req;
 
   // ############
@@ -24,7 +25,7 @@ const uploadController = (req, res) => (async () => {
   // ############
   const userFakeFs = userFs(files);
   const dirStructure = userFakeFs.dirStructure(ROOT_PATH);
-  const persistedTree = await buildDBTree(req.userId, dirStructure);
+  const persistedTree = await buildDBTree(req.userId, dirStructure, rootNode);
 
   return res.status(200).send(persistedTree.children.map(child => manifestSerializer(child.self)));
 })().catch(console.error);

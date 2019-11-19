@@ -12,7 +12,7 @@ class File extends ManifestInterface {
   }
 
   async download (writeableStream) {
-    const readStream = await this.getReadableStream(this.manifest);
+    const readStream = await this.getReadableStream();
     return readStream.pipe(writeableStream);
   };
 
@@ -35,7 +35,8 @@ class File extends ManifestInterface {
     let uploadHelper;
     if (!manifest.id) {
       const rawDigest = crypto.pseudoRandomBytes(16);
-      const filename = rawDigest.toString('hex');
+      const fileDigest = rawDigest.toString('hex');
+      const filename = `${ fileDigest }.gz`;
 
       const currentStorage = this.drive.storage.getIdentity();
       const identity = currentStorage.identity;
@@ -70,33 +71,13 @@ class File extends ManifestInterface {
       identity,
     } = await this.getUploadHelper();
 
-    const passThrough = new PassThrough();
     const compress = zlib.createGzip();
+    const destination = new PassThrough();
 
-// .pipe(compress)
-    stream.pipe(passThrough);
+    const compressedStream = stream.pipe(compress);
+    compressedStream.pipe(destination);
 
-    passThrough.on('data', (data) => {
-      // console.log('=======================>>>> PIPING HOT');
-      // console.log('========>> ', filename, fileId, identity.provider)
-      // console.log('original.PassThrough ============>>> => => -> ', filename, data);
-      // const d = data.toString('utf8')
-      console.log('converted.PassThrough ============>>> => => -> ', filename, data);
-    });
-
-    compress.on('data', (data) => {
-      console.log('original.Compress ============>>> => => -> ', filename, data);
-      zlib.inflate(data, (err, buf) => {
-
-        if (collector.has(filename)) throw new Error('Fumble')
-        console.log('inflated.Compress ============>>> => => -> ', filename, buf);
-        collector.add(filename);
-
-      })
-    })
-
-
-    const providerManifestId = await servicesHelper.uploader.uploadStream(client, identity, passThrough, filename, fileId);
+    const providerManifestId = await servicesHelper.uploader.uploadStream(client, identity, destination, filename, fileId);
 
     return {
       provider: identity.provider,
@@ -124,12 +105,9 @@ class File extends ManifestInterface {
     const client = await storageService.client.getBasicClient(this.drive.userId);
     const readStream = await storageService.download(client, folderId, folderName, documentId, digest);
 
-    const passThrough = new PassThrough();
+    const decompress = zlib.createGunzip();
 
-// .pipe(zlib.createGunzip())
-    readStream.pipe(passThrough);
-
-    return passThrough;
+    return readStream.pipe(decompress);
   };
 }
 

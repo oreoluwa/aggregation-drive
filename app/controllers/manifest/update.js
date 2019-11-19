@@ -1,6 +1,7 @@
 const Models = require('models').initializeModels();
 const Manifest = Models.manifest;
 const manifestSerializer = require('serializers/manifestSerializer');
+const notificationsHelper = require('helpers/webhookHandler');
 // const util = require('util');
 // const logggg = (...args) => console.log('==> ==> => ->', util.inspect(args, false, null, true))
 
@@ -38,63 +39,65 @@ const validateBody = (body, manifest, permittedParams = []) => {
 }
 
 const updateController = (req, res) => (async () => {
-      const manifest = await Manifest.findOne({
-        where: {
-          id: req.params.fileId,
-          userId: req.userId,
-        },
-        include: {
-          model: Manifest,
-          as: 'descendents',
-          hierarchy: true,
-        }
-      });
+  const manifest = await Manifest.findOne({
+    where: {
+      id: req.params.fileId,
+      userId: req.userId,
+    },
+    include: {
+      model: Manifest,
+      as: 'descendents',
+      hierarchy: true,
+    }
+  });
 
-      const updateParams = validateBody(req.body, manifest, basePermittedUpdateAttributes);
-      const recordsArray = [];
+  const updateParams = validateBody(req.body, manifest, basePermittedUpdateAttributes);
+  const recordsArray = [];
 
-      Object.keys(updateParams).forEach(attr => {
-        // first check if it's a rawAttribute
-        if (attr === 'parentId') return;
-        manifest.setDataValue(attr, updateParams[attr]);
-      });
+  Object.keys(updateParams).forEach(attr => {
+    // first check if it's a rawAttribute
+    if (attr === 'parentId') return;
+    manifest.setDataValue(attr, updateParams[attr]);
+  });
 
-      let doBulkUpdate = false
-      let pathArray, newParent;
+  let doBulkUpdate = false
+  let pathArray, newParent;
 
-      if (updateParams.parentId) {
-        newParent = await Manifest.findOne({
-          where: {
-            id: updateParams.parentId,
-          }
-        });
-        if (newParent) {
-          pathArray = newParent.pathArray;
-          await manifest.setParent(newParent);
-        }
-        }
+  if (updateParams.parentId) {
+    newParent = await Manifest.findOne({
+      where: {
+        id: updateParams.parentId,
+      }
+    });
+    if (newParent) {
+      pathArray = newParent.pathArray;
+      await manifest.setParent(newParent);
+    }
+  }
 
-        if (updateParams.name || newParent) {
-          doBulkUpdate = true;
-          if (!pathArray) {
-            pathArray = manifest.pathArray;
-            pathArray.pop();
-          };
+  if (updateParams.name || newParent) {
+    doBulkUpdate = true;
+    if (!pathArray) {
+      pathArray = manifest.pathArray;
+      pathArray.pop();
+    };
 
-          updateTree(manifest, recordsArray, pathArray);
-        }
+    updateTree(manifest, recordsArray, pathArray);
+  }
 
-        if (doBulkUpdate) {
-          await Manifest.bulkCreate(recordsArray, {
-            updateOnDuplicate: [...basePermittedUpdateAttributes, 'fullPath'],
-            returning: false,
-            hooks: false,
-          });
-        }
+  if (doBulkUpdate) {
+    const updatedManifests = await Manifest.bulkCreate(recordsArray, {
+      updateOnDuplicate: [...basePermittedUpdateAttributes, 'fullPath'],
+      returning: true,
+      hooks: false,
+    });
 
-        const updatedManifest = await manifest.reload();
+    updatedManifests.map(updatedManifest => notificationsHelper(updatedManifest.userId, updatedManifest, 'update'))
+  }
 
-        return res.status(200).send(manifestSerializer(updatedManifest));
-      })().catch(console.error);
+  const updatedManifest = await manifest.reload();
 
-    module.exports = updateController;
+  return res.status(200).send(manifestSerializer(updatedManifest));
+})().catch(console.error);
+
+module.exports = updateController;

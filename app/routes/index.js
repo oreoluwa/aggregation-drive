@@ -2,6 +2,7 @@ const Router = require('express').Router();
 const providers = require('controllers/providers');
 const driveController = require('controllers/drive');
 const manifestController = require('controllers/manifest');
+const webhooksController = require('controllers/webhooks');
 
 const { buildRootNode } = require('helpers/tree');
 const { ROOT_PATH, ROOT_PREFIX_REGEX_FULLPATH } = require('config/components/variables');
@@ -29,13 +30,13 @@ Router.use((req, res, next) => {
   next();
 });
 
-// // Build Root Node// Ideally should happen after sign up
-// Router.use(async (req, res, next) => {
-//   const rootNode = await buildRootNode(req.userId);
-//
-//   req.rootNode = rootNode;
-//   next();
-// });
+// Build Root Node// Ideally should happen after sign up
+Router.use(async (req, res, next) => {
+  const rootNode = await buildRootNode(req.userId);
+
+  req.rootNode = rootNode;
+  next();
+});
 
 Router.param('provider', (req, res, next, provider) => {
   if (!providerMap[provider]) return res.status(400).send({
@@ -70,7 +71,6 @@ Router.param('fileId', async (req, res, next, fileId) => {
     where.fullPath = path.join(ROOT_PATH, simplePath);
   }
   // if (simplePath === '/' || ROOT_PREFIX_REGEX_FULLPATH.test(simplePath))
-
 
   const manifest = await Manifest.findOne({
     where,
@@ -124,6 +124,7 @@ Router.get('/upload', (req, res) => {
   `)
 })
 
+Router.post('/subscribe', webhooksController.create);
 Router.get('/manifest/:fileId/size', manifestController.size);
 Router.put('/manifest/:fileId', manifestController.update);
 Router.delete('/manifest/:fileId', manifestController.del);
