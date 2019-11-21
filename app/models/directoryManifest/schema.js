@@ -13,6 +13,7 @@ module.exports = (sequelizeDB, modelName) => {
       allowNull: false,
     },
   }, {
+    hooks: defaultManifestSettings.hooks,
     defaultScope: {
       where: {
         isDirectory: true

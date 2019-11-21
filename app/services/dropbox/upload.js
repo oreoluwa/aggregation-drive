@@ -16,9 +16,10 @@
 //   return file;
 // }
 
-const uploadToDrive = async (client, folderId, folderName, digest, stream) => {
+const uploadToDrive = async (client, folderId, folderName, digest, stream, fileId) => {
 
   const file = await client({
+    // use session upload
     resource: 'files/upload',
     parameters: {
       path: `/${ folderName }/${ digest }`,

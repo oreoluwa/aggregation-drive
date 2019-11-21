@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const path = require('path');
+const notificationsHelper = require('helpers/webhookHandler');
 
 const attributes = {
   id: {
@@ -34,7 +35,7 @@ const attributes = {
       if (fullPath && fullPath.substr(0, 1) === '/'){
         fullPath = fullPath.substr(1);
       }
-      return fullPath.split('/');
+      return fullPath.split(path.sep);
     },
     set: function (value) { this.setDataValue('fullPath', path.join('/', ...value) ) }
   }
@@ -49,10 +50,23 @@ const hierarchyConfig = {
   // throughSchema: 'ancestries',
   // freezeTableName: true,
   camelThrough: true,
-  // onDelete: 'CASCADE',
+  onDelete: 'CASCADE',
 };
+
+const hooks = {
+  afterUpdate: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'update')
+  },
+  afterCreate: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'create')
+  },
+  afterDestroy: (manifest, options) => {
+    notificationsHelper(manifest.userId, manifest, 'destroy')
+  },
+}
 
 module.exports = {
   attributes,
   hierarchyConfig,
+  hooks,
 };

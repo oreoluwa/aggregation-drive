@@ -33,6 +33,7 @@ module.exports = (sequelizeDB, modelName) => {
       allowNull: false,
     },
   }, {
+    hooks: defaultManifestSettings.hooks,
     hierarchy: defaultManifestSettings.hierarchyConfig,
   });
 

@@ -20,3 +20,20 @@ services:
       - GOOGLE_CLIENT_ID
       - GOOGLE_CLIENT_SECRET
       - GOOGLE_REDIRECT_URI
+
+  fuse:
+    image: oreoluwa/multicloud-fuse
+    build:
+      context: ./fuse
+    command: ['npm', 'start']
+    volumes:
+      - $PWD/fuse:/var/app
+    # devices:
+    #   - /dev/fuse:/dev/fuse:rwm
+    # cap_add:
+    #   - SYS_ADMIN
+    environment:
+      - API_BASE_URL=http://app:3001
+      - SERVER_PORT=3000
+    depends_on:
+      - app

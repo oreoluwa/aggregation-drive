@@ -1,10 +1,11 @@
+const { ROOT_PATH, ROOT_NAME } = require('config/components/variables');
 const Models = require('models').initializeModels();
 const Directory = Models.directoryManifest;
 const Manifest = Models.manifest;
 const util = require('util');
 
 const buildRootNode = async (userId) => {
-  const rootScope = { userId, fullPath: '/root', name: 'root'};
+  const rootScope = { userId, fullPath: ROOT_PATH, name: ROOT_NAME };
 
   const [ rootNode, isCreated ] = await Directory.findOrCreate({
     where: rootScope,
@@ -14,29 +15,39 @@ const buildRootNode = async (userId) => {
   return rootNode;
 }
 
-const buildDBTree = async (userId, dirTree, parentId=null) => {
+const buildDBTree = async (userId, dirTree, parentOrParentId=null) => {
+// const buildDBTree = async (userId, dirTree, parentId=null) => {
   const buildTree = dirTree || {};
   const isDirectory = dirTree.type === 'folder';
   const isFile = dirTree.type === 'file';
-  const isRootNode = dirTree.path === '/';
-  const hasNode = isRootNode || parentId;
-  const scope = hasNode && (isRootNode && { fullPath: dirTree.path }) || { id: parentId };
+  const isRootNode = dirTree.path === ROOT_PATH;
+  const hasNode = isRootNode || parentOrParentId;
 
-  const parent = !hasNode ? { id: null } : (await Directory.findOne(
-    {
-      where: {
-        userId,
-        ...scope,
-      }
 
+  let parent;
+  if (parentOrParentId instanceof Directory) {
+    parent = parentOrParentId;
+  } else if (hasNode) {
+    const whereScope = { userId };
+
+    if (isRootNode) {
+      whereScope.fullPath = dirTree.path;
+    } else {
+      whereScope.id = parentOrParentId;
     }
-  ));
+
+    parent = await Directory.findOne({
+      where: {
+        ...whereScope,
+      }
+    });
+  };
 
   const defaultParams = {
     fullPath: dirTree.path,
     name: dirTree.name,
-    parentId: parent.id || null,
-    userId: userId,
+    parentId: (parent && parent.id) || null,
+    userId,
   }
 
   let self, isCreated;
@@ -54,15 +65,13 @@ const buildDBTree = async (userId, dirTree, parentId=null) => {
         provider: dirTree.provider,
       },
     });
-    // handle replacing file content
-    // self.update({})
-  } else if (!isRootNode && isDirectory) {
+  } else if (isDirectory && !isRootNode) {
     [self, isCreated] = await Directory.findOrCreate({
       where: defaultParams,
       defaults: defaultParams,
     })
 
-  } else if(isRootNode) {
+  } else if (isRootNode) {
     self = parent;
   };
 
@@ -81,7 +90,7 @@ const buildDBTree = async (userId, dirTree, parentId=null) => {
 
   const children = await dirTree.children.reduce(async (asyncChildren, child) => {
     const resolvedChildren = await asyncChildren;
-    child.self = (await buildDBTree(userId, child, self.id)).self;
+    child.self = (await buildDBTree(userId, child, self)).self;
 
     return resolvedChildren.concat(child);
   }, Promise.resolve([]));
@@ -110,5 +119,6 @@ const extractManifestsFromTree = (tree) => {
 
 module.exports = {
   buildDBTree,
+  buildRootNode,
   extractManifestsFromTree,
 }

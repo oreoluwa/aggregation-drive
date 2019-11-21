@@ -2,7 +2,7 @@ const downloadFromDrive = async (client, folderId, folderName, documentId, diges
   const readableStream = await client({
     resource: 'files/download',
     parameters: {
-      path: folderId,
+      path: documentId,
     },
   });
 
