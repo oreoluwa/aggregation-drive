@@ -20,6 +20,9 @@ ENV NODE_ENV=production
 
 COPY . .
 
+COPY entrypoint /entrypoint
+
 VOLUME /mnt
 
-CMD npm start
+CMD ["/entrypoint"]
+# CMD npm start

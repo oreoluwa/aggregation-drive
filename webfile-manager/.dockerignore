@@ -1,0 +1,11 @@
+*.bak
+node_modules
+node_modules/
+**node_modules/**
+k8s
+k8s/
+**k8s/**
+.codesnip
+codesnip
+./codesnip
+*codesnip*

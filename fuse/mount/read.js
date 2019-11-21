@@ -6,7 +6,6 @@ const through = require('through2');
 const read = async (withCache, path, fd, buffer, length, offset, cb) => {
   debug('read(%s, %d, %d, %d)', path, fd, length, offset)
 
-  // depending
   const manifest = await withCache.findByFileDescriptor(fd);
 
   if (!manifest) return cb(ENOENT);
@@ -28,7 +27,11 @@ const read = async (withCache, path, fd, buffer, length, offset, cb) => {
 
   proxy.once('readable', function getContent () {
     const result = proxy.read(contentLength);
-    if (!result) return getContent();
+    debug.extend('readable:requestedContentLength')(contentLength);
+    debug.extend('readable:resultLength')((result || '').length);
+
+    if (!result) return setImmediate(getContent);
+
     result.copy(buffer);
     return cb(result.length);
   });
