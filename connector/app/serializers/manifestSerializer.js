@@ -1,13 +1,14 @@
 const manifestSerializer = (manifest, ancestor) => {
   const manifestAttributes = manifest.attributes;
   let ancestors = [];
-  if ((Array.isArray(ancestor) && ancestor.length)) ancestors = ancestors.concat(ancestor);
+  if ((Array.isArray(ancestor) && ancestor.length)) ancestors = ancestors.concat(ancestor).reverse();
 
   return {
     id: manifest.id,
     name: manifestAttributes.name,
     createdTime: manifestAttributes.createdAt,
     modifiedTime: manifestAttributes.updatedAt,
+    path: manifestAttributes.path,
     // need to implement capabilities
     capabilities: {
       canDelete: false,

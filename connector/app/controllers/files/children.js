@@ -1,5 +1,8 @@
 const httpClient = require('helpers/client');
-const manifestSerializer = require('serializers/manifestSerializer');
+const {
+  buildHierarchyCache,
+  getData,
+} = require('./helper');
 const util = require('util');
 const sendType = require('@polka/send-type');
 const SHOW_ENDPOINT = 'manifest/%s'
@@ -31,34 +34,16 @@ const controller = (req, res, next) => ( async () => {
     }, {});
   };
 
-  const hierarchyCache = responseData.included.reduce((acc, includedManifest) => {
-    const isParent = manifestData.relationships.parents.data.some(parent => includedManifest.id === parent.id );
-    const isDirectChild = manifestData.relationships.children.data.some(child => includedManifest.id === child.id );
-
-    if (isParent) acc.parents[includedManifest.attributes.level] = includedManifest;
-    if (isDirectChild) acc.directChildren.push(includedManifest);
-
-    return acc;
-  }, {
-    parents: [],
-    directChildren: [],
-  });
+  const hierarchyCache = buildHierarchyCache(manifestData, responseData.included);
 
   const parentHierarchy = hierarchyCache.parents;
 
-  const getData = (manifest, hierarchy) => {
-    const parents = hierarchy.slice(0);
-    const ancestors = hierarchy.reduce((acc, parent) => {
-      const current = parents.shift();
-
-      if (current) acc = acc.concat( getData(current, parents) );
-
-      return acc
-    }, []);
-    return manifestSerializer(manifest, ancestors);
-  };
-
-  const items = hierarchyCache.directChildren.map(child => getData(child, [manifestData, ...parentHierarchy]));
+  let items = hierarchyCache.directChildren.map(child => getData(child, [...parentHierarchy, manifestData]));
+  if (req.query.orderBy) {
+    const { orderBy, orderDirection } = req.query;
+    const precedenceValue = (orderDirection === 'ASC') ? -1 : 1;
+    items = items.sort((a, b) => (a[orderBy] > b[orderBy]) ? -precedenceValue : precedenceValue );
+  }
 
   return sendType(res, 200, { items }, {});
 })().catch(err => console.error(err) && next(err));

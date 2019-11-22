@@ -30,6 +30,20 @@ Router.use((req, res, next) => {
   next();
 });
 
+Router.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+
+  if (req.method.toUpperCase() === 'OPTIONS') {
+    res.setHeader('Content-Length', '0');
+    res.status(200);
+    return res.end();
+  }
+  next();
+});
+
 // Build Root Node// Ideally should happen after sign up
 Router.use(async (req, res, next) => {
   const rootNode = await buildRootNode(req.userId);
@@ -70,7 +84,6 @@ Router.param('fileId', async (req, res, next, fileId) => {
     simplePath = simplePath.replace(ROOT_PREFIX_REGEX_FULLPATH, '').replace(/\/$/, '');
     where.fullPath = path.join(ROOT_PATH, simplePath);
   }
-  // if (simplePath === '/' || ROOT_PREFIX_REGEX_FULLPATH.test(simplePath))
 
   const manifest = await Manifest.findOne({
     where,
@@ -139,5 +152,11 @@ Router.get('/health', (req, res) => {
     message: 'Welcome to MultiCloud Drive'
   })
 })
+
+Router.get('/oauth/access_token', (req, res) => {
+  return res.status(200).send({
+    access_token: '1234568',
+  })
+});
 
 module.exports = Router;

@@ -33,7 +33,7 @@ const prepareResponse = (headers) => {
 
 const downloadController = (req, res, next) => (async () => {
   const fileId = req.params.fileId;
-  const cacheId = `__download_${ fileId }`;
+  const cacheId = `__downloads_${ fileId }`;
 
   let responseCache = req.proxyServer.cache.get(cacheId) || {};
   let {
@@ -46,7 +46,7 @@ const downloadController = (req, res, next) => (async () => {
 
   if (!contentRangeStr) {
     const downloadResponse = await req.proxyServer.axiosInstance.get(`download/${fileId}`, {
-      responseType: 'stream'
+      responseType: 'stream',
     });
 
     res.writeHead(downloadResponse.status, downloadResponse.headers);

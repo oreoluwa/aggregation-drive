@@ -1,5 +1,8 @@
 const httpClient = require('helpers/client');
-const manifestSerializer = require('serializers/manifestSerializer');
+const {
+  buildHierarchyCache,
+  getData,
+} = require('./helper');
 const util = require('util');
 const sendType = require('@polka/send-type');
 const SHOW_ENDPOINT = 'manifest/%s'
@@ -22,23 +25,9 @@ const controller = (req, res, next) => ( async () => {
 
   const manifestData = responseData.data;
 
-  const parentHierarchy = responseData.included.reduce((acc, includedManifest) => {
-    const isParent = manifestData.relationships.parents.data.some(parent => includedManifest.id === parent.id );
-    if (isParent) acc[includedManifest.attributes.level] = includedManifest;
+  const hierarchyCache = buildHierarchyCache(manifestData, responseData.included);
 
-    return acc;
-  }, []).filter(p => p).reverse();
-
-  const getData = (manifest, hierarchy) => {
-    const parents = hierarchy.slice(0);
-
-    const ancestors = hierarchy.map(parent => {
-      const current = parents.shift();
-      return getData(current, parents);
-    });
-
-    return manifestSerializer(manifest, ancestors);
-  };
+  const parentHierarchy = hierarchyCache.parents;
 
   const data = getData(responseData.data, parentHierarchy);
 

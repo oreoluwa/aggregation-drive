@@ -2,6 +2,4 @@
 
 while ! curl -sSf "$API_BASE_URL/health" > /dev/null; do sleep 5; done
 
-npm start
-# &
-# npm --prefix connector start
+npm start;

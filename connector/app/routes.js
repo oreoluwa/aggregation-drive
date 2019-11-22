@@ -8,10 +8,15 @@ module.exports = (app) => {
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE, PUT');
+
+    if (req.method.toUpperCase() === 'OPTIONS') {
+      res.statusCode = 200;
+      return res.end();
+    }
     next();
   });
+
   app.use('/files', (req, _, next) => {
-    // Buffer.from('/', 'base64')
     req.fileId = req.params.fileId ? req.params.fileId : 'Lw'
     return next();
   });

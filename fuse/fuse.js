@@ -41,18 +41,29 @@ module.exports = (async () => {
   });
 })().catch(console.error);
 
+const unmount = (mountPath, cb) => fuse.unmount(mountPath, (err) => {
+  if (err) {
+    console.error('filesystem at ' + mountPath + ' not unmounted', err);
+  } else {
+    console.log('filesystem at ' + mountPath + ' unmounted');
+  }
+  return cb(err);
+});
+
 process.on('SIGINT', () => {
-  fuse.unmount(mountPath, (err) => {
-    if (err) {
-      console.log('filesystem at ' + mountPath + ' not unmounted', err)
-      process.exit(1)
-    } else {
-      console.log('filesystem at ' + mountPath + ' unmounted')
-      process.exit(0)
-    }
+  return unmount(mountPath, (err) => {
+    if (err) return process.exit(1)
+    process.exit(0)
   })
 });
 
-process.on('uncaughtException', (err) => {
-  console.log(err);
+process.on('unhandledRejection', (reason, p) => {
+  console.error(reason, 'Unhandled Rejection at Promise', p);
+});
+
+process.on('uncaughtException', err => {
+  console.error(err, 'Uncaught Exception thrown');
+  return unmount(mountPath, (err) => {
+    process.exit(1);
+  });
 });

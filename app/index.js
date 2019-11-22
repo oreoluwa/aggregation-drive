@@ -27,3 +27,12 @@ module.exports = (async () => {
     console.log('app started on port %s', serverPort);
   });
 })().catch(console.error);
+
+process.on('unhandledRejection', (reason, p) => {
+  console.error(reason, 'Unhandled Rejection at Promise', p);
+});
+
+process.on('uncaughtException', err => {
+  console.error(err, 'Uncaught Exception thrown');
+  process.exit(1);
+});
