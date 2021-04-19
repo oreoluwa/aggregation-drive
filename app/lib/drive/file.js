@@ -105,7 +105,11 @@ class File extends ManifestInterface {
     const client = await storageService.client.getBasicClient(this.drive.userId);
     const readStream = await storageService.download(client, folderId, folderName, documentId, digest);
 
-    const decompress = zlib.createGunzip();
+    const zlibOptions = {
+      flush: zlib.Z_SYNC_FLUSH,
+      finishFlush: zlib.Z_SYNC_FLUSH,
+    }
+    const decompress = zlib.createGunzip(zlibOptions);
 
     return readStream.pipe(decompress);
   };

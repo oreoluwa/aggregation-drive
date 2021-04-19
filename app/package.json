@@ -27,7 +27,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node --max-old-space-size=4096 index.js"
   },
   "author": "Oreoluwa <oreoluwa@outlook.com>",
   "license": "MIT",

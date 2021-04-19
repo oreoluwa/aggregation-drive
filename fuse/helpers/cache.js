@@ -1,19 +1,42 @@
+const { debugPrefix } = require('../package.json');
+const debug = require('debug')(debugPrefix + ':cache');
 const base64Url = require('base64-url');
 const qs = require('querystring');
 const deepExtend = require('deep-extend');
 
-const getManifest = async(httpClient, path) => {
-  const encodedPath = base64Url.encode(path);
-  const response = await httpClient.get(`manifest/${encodedPath}`, {
-    params: {
-      include: 'children',
+const nxManifest = (path) => ({
+  data: {
+    id: 'nx',
+    attributes: {
+      path,
     },
-    paramsSerializer: (params) => qs.stringify(params, {
-      arrayFormat: 'repeat'
-    }),
-  });
+    meta: {
+      nx: true,
+    }
+  }
+});
 
-  return response.data;
+const getManifest = async(httpClient, path) => {
+  let data;
+  try {
+    const encodedPath = base64Url.encode(path);
+    const response = await httpClient.get(`manifest/${encodedPath}`, {
+      params: {
+        include: 'children',
+      },
+      validateStatus: (status) => (status >= 200 && status < 300),
+      paramsSerializer: (params) => qs.stringify(params, {
+        arrayFormat: 'repeat'
+      }),
+    });
+    data = response.data;
+  } catch (err) {
+    const response = err.response;
+    debug.extend(`getManifest:error:${response.status}`)(JSON.stringify(response.data));
+    data = nxManifest(path);
+  };
+
+  return data;
 };
 
 const cacheHandler = (cache, httpClient) => {
@@ -72,7 +95,7 @@ const cacheHandler = (cache, httpClient) => {
       if (responseData.included) responseData.included.map(addManifest);
     };
 
-    return !manifest.attributes.deletedAt && manifest;
+    return !(manifest.meta && manifest.meta.nx) && !manifest.attributes.deletedAt && manifest;
   }
 
   const findById = (id) => {

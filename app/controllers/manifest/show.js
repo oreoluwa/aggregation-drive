@@ -12,24 +12,44 @@ const getManifestRef = (manifest) => {
   }
 };
 
-const serializeChildren = (tree, collection=[]) => {
-  return (tree.children || []).reduce((children, child) => {
-    const serializedChild = manifestSerializer(child, { size: getManifestRef(child).size });
-    return serializeChildren(child, children.concat(serializedChild));
+const serializeRecords = (tree, collection=[], accessor='children') => {
+  return (tree[accessor] || []).reduce((collector, record) => {
+    const serializedRecord = manifestSerializer(record, { size: getManifestRef(record).size });
+    return serializeRecords(record, collector.concat(serializedRecord), accessor);
   }, collection);
 }
 
 const getManifestController = (req, res) => (async () => {
+  const includeQuery = [].concat(req.query.include);
+  const include = [];
+  let order = [];
+  if (includeQuery.includes('children')) {
+    include.push({
+      model: Manifest,
+      as: 'descendents',
+      hierarchy: true,
+    });
+  }
+  if (includeQuery.includes('parents')) {
+    include.push({
+      model: Manifest,
+      as: 'ancestors',
+    });
+    order = order.concat([
+      [{
+        model: Manifest,
+        as: 'ancestors'
+      }, 'hierarchyLevel']
+    ])
+  };
+
   const manifest = await Manifest.findOne({
     where: {
       id: req.fileId || req.params.fileId,
       userId: req.userId,
     },
-    include: {
-      model: Manifest,
-      as: 'descendents',
-      hierarchy: true,
-    }
+    include,
+    order,
   });
 
   const overrideAttrs = {
@@ -37,7 +57,10 @@ const getManifestController = (req, res) => (async () => {
   };
 
   const data = manifestSerializer(manifest, overrideAttrs);
-  let included = (req.query.include === 'children') ? serializeChildren(manifest) : undefined;
+  let included;
+  if (includeQuery.includes('children')) included = serializeRecords(manifest, (included || []), 'children');
+  if (includeQuery.includes('parents')) included = serializeRecords(manifest, (included || []), 'ancestors');
+
   return res.status(200).send({ data, included });
 })().catch(console.error);
 

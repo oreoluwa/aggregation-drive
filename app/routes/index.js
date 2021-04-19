@@ -130,4 +130,14 @@ Router.put('/manifest/:fileId', manifestController.update);
 Router.delete('/manifest/:fileId', manifestController.del);
 Router.get('/manifest/:fileId', manifestController.show);
 
+Router.get('/health', (req, res) => {
+  const now = +new Date();
+  const uptime = now - req.app.START_TIME;
+
+  return res.status(200).send({
+    uptime,
+    message: 'Welcome to MultiCloud Drive'
+  })
+})
+
 module.exports = Router;

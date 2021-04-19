@@ -17,6 +17,9 @@ const manifestSerializer = ({
   providerManifestId,
   userId,
   children,
+  ancestors,
+  parentId,
+  hierarchyLevel,
   digest,
 }, overrideAttrs = {}) => {
   const fileType = isDirectory ? 'folders' : 'files';
@@ -37,6 +40,26 @@ const manifestSerializer = ({
         id: child.id,
       }))
     };
+  }
+
+  let parentMap;
+  if (ancestors) {
+    parentMap = {
+      data: ancestors.map(parent => ({
+        type: 'parents',
+        id: parent.id,
+      }))
+    };
+  }
+
+  let parent;
+  if (parentId) {
+    parent = {
+      data: {
+        id: parentId,
+        type: 'parent',
+      }
+    }
   }
 
   let fileDigest, providerInfo, mimeTypeInfo;
@@ -61,6 +84,7 @@ const manifestSerializer = ({
       size,
       createdAt,
       updatedAt,
+      level: hierarchyLevel,
       digest: fileDigest,
       ...overrideAttrs,
     },
@@ -72,7 +96,9 @@ const manifestSerializer = ({
           type: 'users',
         }
       },
+      parent,
       children: childrenMap,
+      parents: parentMap,
     },
   });
 }

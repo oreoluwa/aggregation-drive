@@ -64,7 +64,7 @@ class Folder extends ManifestInterface {
 
   get size () {
     return (function calculateSize(tree, accSize) {
-      return tree.children.reduce((size, child) => {
+      return (tree.children || []).reduce((size, child) => {
         if (child.isDirectory) return calculateSize(child, size);
         return size + (child.size || 0);
       }, accSize);

@@ -1,5 +1,6 @@
 const { debugPrefix } = require('../package.json');
 const debug = require('debug')( debugPrefix + ':open' );
+const { ENOENT } = require('./errorCodes');
 
 const toFlag = (flags) => {
   flags = flags & 3;
@@ -13,6 +14,7 @@ const open = async (withCache, path, flags, cb) => {
 
   const openFlag = toFlag(flags);
   const fd = await withCache.getFileDescriptor(path, openFlag);
+  if (!fd && fd !== 0) return cb(ENOENT)
 
   cb(0, fd);
 };

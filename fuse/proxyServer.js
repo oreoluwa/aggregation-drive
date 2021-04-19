@@ -39,13 +39,20 @@ class Server {
 
   proxyMiddleware() {
     return (req, res, next) => (async () => {
-      const { data, status, headers} = await this.axiosInstance({
-        url: req.url,
-        method: req.method,
-        headers: req.headers,
-        paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
-      });
+      let response;
+      try {
+        response = await this.axiosInstance({
+          url: req.url,
+          method: req.method,
+          headers: req.headers,
+          validateStatus: (status) => true,
+          paramsSerializer: (params) => qs.stringify(params, { arrayFormat: 'repeat' }),
+        });
+      } catch (err) {
+        response = err.response
+      }
 
+      const { status, data, headers } = response;
       return sendResponse(res, status, data, headers);
     })().catch(console.error);
   }
